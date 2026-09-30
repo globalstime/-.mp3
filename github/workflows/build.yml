@@ -1,0 +1,46 @@
+name: Собрать APK
+
+on:
+  push:
+    branches: [main, главный]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Распаковать проект
+        run: unzip -o Mellstroynost.zip -d .
+
+      - name: Настроить JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Настройка Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
+      - name: Принять лицензии + поставить SDK
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Установить Gradle
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q gradle-8.7-bin.zip -d $HOME
+          echo "$HOME/gradle-8.7/bin" >> $GITHUB_PATH
+
+      - name: Сборка отладочного APK
+        run: gradle assembleDebug --stacktrace
+
+      - name: Загрузить APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mellstroynost-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
