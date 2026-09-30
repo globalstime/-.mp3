@@ -11,8 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Распаковать проект
-        run: unzip -o Mellstroynost.zip -d .
+      - name: Распаковать любой zip
+        run: |
+          ls -la *.zip
+          unzip -o *.zip -d .
 
       - name: Настроить JDK 17
         uses: actions/setup-java@v4
